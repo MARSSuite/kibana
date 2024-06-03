@@ -14,25 +14,28 @@ export const VerifyExistingNodeBuilds: GlobalTask = {
   global: true,
   description: 'Verifying previously downloaded node.js build for all platforms',
   async run(config, log) {
-    const builds: Array<{ downloadPath: string; shaChecksum: string;}> = [];
+    const builds: Array<{ downloadPath: string; shaChecksum: string }> = [];
     for (const platform of config.getNodePlatforms()) {
       for (const nodeInfo of getNodeDownloadInfo(config, platform)) {
         const shasums = await getNodeShasums(log, config.getNodeVersion(), nodeInfo.variant);
         if (!builds.some((build) => build.downloadPath === nodeInfo.downloadName)) {
           builds.push({
-            downloadPath: nodeInfo.downloadPath, shaChecksum: shasums[nodeInfo.downloadName],
+            downloadPath: nodeInfo.downloadPath,
+            shaChecksum: shasums[nodeInfo.downloadName],
           });
         }
       }
     }
 
-    await Promise.all(builds.map(async ({shaChecksum, downloadPath}) => {
-      const sha256 = await getFileHash(downloadPath, 'sha256');
-      if (sha256 !== shaChecksum) {
-        throw new Error(`Download at ${downloadPath} does not match expected checksum ${sha256}`);
-      }
+    await Promise.all(
+      builds.map(async ({ shaChecksum, downloadPath }) => {
+        const sha256 = await getFileHash(downloadPath, 'sha256');
+        if (sha256 !== shaChecksum) {
+          throw new Error(`Download at ${downloadPath} does not match expected checksum ${sha256}`);
+        }
 
-      log.success(`Download at ${downloadPath} matches checksum`);
-    }))
+        log.success(`Download at ${downloadPath} matches checksum`);
+      })
+    );
   },
 };

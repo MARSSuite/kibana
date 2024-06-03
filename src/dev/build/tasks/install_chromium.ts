@@ -18,7 +18,9 @@ export const InstallChromium: Task = {
 
     for (const platform of config.getNodePlatforms()) {
       const pkg = paths.find(platform.getName(), platform.getArchitecture(), preInstalledPackages);
-      const target = `${platform.getVariant() || 'default'}-${platform.getName()}-${platform.getArchitecture()}`;
+      const target = `${
+        platform.getVariant() || 'default'
+      }-${platform.getName()}-${platform.getArchitecture()}`;
 
       if (!pkg || platform.isServerless()) {
         log.info(`Skipping Chromium install for ${target}`);
